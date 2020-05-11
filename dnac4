@@ -1,0 +1,163 @@
+#! /bin/sh
+# $Id: form1,v 1.15 2011/10/04 23:36:53 tom Exp $
+
+#. ./setup-vars
+: "${DIALOG=dialog}"
+
+: "${DIALOG_OK=0}"
+: "${DIALOG_CANCEL=1}"
+: "${DIALOG_HELP=2}"
+: "${DIALOG_EXTRA=3}"
+: "${DIALOG_ITEM_HELP=4}"
+: "${DIALOG_ESC=255}"
+
+: "${SIG_NONE=0}"
+: "${SIG_HUP=1}"
+: "${SIG_INT=2}"
+: "${SIG_QUIT=3}"
+: "${SIG_KILL=9}"
+: "${SIG_TERM=15}"
+
+#DIALOG_ERROR=254
+#export DIALOG_ERROR
+
+function dnac()
+{
+returncode=0
+count=1
+
+while test $returncode != 1 && test $returncode != 250
+do
+exec 3>&1
+value=`$DIALOG --ok-label "SUBMIT"  --cancel-label "CONTINUE"   \
+	  --backtitle "BEGIN DNAC Center $count CONFIGURATION "  \
+	  --insecure "$@"  --colors \
+	  --mixedform "Please add DNA Center configuration for the appliance.
+
+  (Use \Zn\Z4Up\Zn/\Zn\Z4Down\Zn keys to navigate to next field. Press \Zn\Z4Tab \Znto jump to\Zn\Z4 <SUBMIT> or <CONTINUE>\Zn button)      " \
+25 65 0 \
+        "IP/FQDN          :"      1 1    ""  1 20 40 0 0 \
+        "Username         :"      2 1    ""  2 20 40 0 0 \
+	"Password         :"      3 1    ""  3 20 40 0 1 \
+	"Confirm Password :"     4 1    ""  4 20 40 0 1 \
+2>&1 1>&3`
+returncode=$?
+l=$returncode
+exec 3>&-
+
+#show=`echo "$value" |sed -e 's/^/	/'`
+val=($value)
+a=${val[0]}
+b=${val[1]}
+c=${val[2]}
+d=${val[3]}
+
+
+if [  $returncode -eq $DIALOG_CANCEL ]
+then
+ 
+      if [ $count -lt 2 ]
+      then 
+	      "$DIALOG" \
+                --clear \
+                --backtitle "" --no-collapse --cr-wrap --ok-label "BACK" \
+                --msgbox "Atleast 1 DNAC Center configuration needed to continue Registration " 10 40
+
+               returncode=99	      
+      else
+	       
+	      break
+      fi
+
+
+fi
+
+
+if [  $returncode -eq $DIALOG_OK ]
+
+then
+
+
+if [ -z $d  ]
+then
+
+	
+"$DIALOG" \
+		--clear \
+		--backtitle "please fill all the field" --no-collapse --cr-wrap --ok-label "BACK" \
+		--msgbox "PLEASE FILL AGAIN AS DATA IS NOT PROVIDED IN ALL THE FIELD" 10 40
+returncode=99
+
+
+
+elif [ $c != $d  ]
+
+then
+	"$DIALOG" \
+		                --clear \
+				--backtitle "please fill all the field" --no-collapse --cr-wrap --ok-label "BACK" \
+			         --msgbox "password doesnt match" 10 40
+
+returncode=99
+
+
+
+else
+
+
+ping -c2 $a &> /dev/null
+if [ $? -ne 0 ]
+
+then 
+       "$DIALOG" \
+                --clear \
+                --backtitle "Wrong DNAC center configuraion Provide " --no-collapse --cr-wrap --ok-label "BACK" \
+                --msgbox "PLEASE FILL AGAIN AS DATA  PROVIDED BEFORE WAS NOT CORRECT" 10 40
+
+
+	returncode=99
+else
+
+####API##
+#count=1
+echo "" >> tt
+echo DNAC$count >> tt
+#echo $a >> tt
+#echo $b >> tt
+#echo $d >> tt
+count=$((count+1))
+fi
+fi
+	#case $returncode in
+if [ $returncode -eq $DIALOG_OK ] 
+	#$DIALOG_OK)
+ then
+
+		"$DIALOG" --clear --backtitle "ADD MORE DNAC CONFIGURATION" --no-collapse --cr-wrap  --yes-label "ADD MORE DNAC"   --no-label "CONTINUE REGISTRATION" \
+		--yesno "Successfully Added  DNAC [$a] configurion  " 20 55
+
+
+		case $? in
+		$DIALOG_OK)
+			 returncode=99
+			;;
+		$DIALOG_CANCEL)
+                       # total=$(cat tt | grep -c DNAC)
+
+
+			break
+			;;
+		esac
+	
+  
+fi
+fi
+
+
+
+
+done
+}
+
+rm -rf tt
+dnac
