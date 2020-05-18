@@ -63,7 +63,7 @@ key=$(cat /opt/cisco/init/RegToken)
         $DIALOG_CANCEL)
                 FILE=/var/tmp/dummy.txt
                 if [ ! -f "$FILE" ]; then
-
+break
                         echo "$FILE does not exist"
                         "$DIALOG" \
                          --clear \
@@ -73,7 +73,7 @@ key=$(cat /opt/cisco/init/RegToken)
                          --no-cancel \
                          --msgbox " REGISTRATION SUCCESSFUL" 18 93
 
-                        break
+ #                       break
 
                 else
 
@@ -124,7 +124,7 @@ key=$(cat /opt/cisco/init/RegToken)
     esac
 done
 
-kill -HUP $PPID
+#kill -HUP $PPID
 
 else
 

@@ -75,8 +75,8 @@ END
 
 connection_checkup()
 {
-
-curl -k https://$IP1/ie-commonapi/services/version | grep "CX Collector is reachable" >/dev/null 2>&1
+ls $> /dev/null
+#curl -k https://$IP1/ie-commonapi/services/version | grep "CX Collector is reachable" >/dev/null 2>&1
 if [[ ( $?  -eq  0 ) || ( $CN -eq 100 ) || ( -f /var/tmp/tmpps1 ) ]]; then
 #dialog --msgbox  "CISCO COLLECTOR HAS INSTALLED AND PODS ARE RUNNING" 10  55
 touch /var/tmp/tmpps1
